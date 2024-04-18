@@ -1,7 +1,11 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
 from posts.models import Comment, Post, Group, Follow
+
+
+User = get_user_model()
 
 
 class PostSerializer(serializers.ModelSerializer):
