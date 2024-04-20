@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, filters, mixins
+from rest_framework import viewsets, filters
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
@@ -12,17 +12,10 @@ from .serializers import (
     GroupSerializer,
     FollowSerializer,
 )
+from .viewsets import CreateListViewSet
 
 
 User = get_user_model()
-
-
-class FollowBaseViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet
-):
-    pass
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -65,7 +58,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
 
 
-class FollowViewSet(FollowBaseViewSet):
+class FollowViewSet(CreateListViewSet):
     """API для подписок."""
 
     serializer_class = FollowSerializer
@@ -74,10 +67,7 @@ class FollowViewSet(FollowBaseViewSet):
     search_fields = ("following__username",)
 
     def get_queryset(self):
-        follow = get_object_or_404(User, username=self.request.user)
-        return follow.follower.all()
+        return self.request.user.follower.all()
 
     def perform_create(self, serializer):
-        following_username = self.request.data.get("following")
-        follow = get_object_or_404(User, username=following_username)
-        serializer.save(user=self.request.user, following=follow)
+        serializer.save(user=self.request.user)
